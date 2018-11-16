@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd">
+
+    <!--
+            1. 放行资源
+            <security:http
+                pattern="/login.html"  要放行的资源
+                security="none"/>      访问资源不需要权限校验
+
+            2. 拦截资源配置、登陆退出表单的配置
+            <security:http auto-config="true"  是否自动生成登陆页面
+                                               如果自己有指定登陆页面以指定的为主
+                    use-expressions="false">   是否使用SpEL表达式
+            3. 登陆表单配置
+            <security:form-login
+                    login-page="/login.html"        登陆页面
+                    username-parameter="userName"   登陆页面的用户名表单元素名称
+                    password-parameter="password"   登陆页面的密码表单元素名称
+                    login-processing-url="/login"   登陆提交地址
+                    default-target-url="/success.html" 登陆后默认进入的页面
+                    authentication-failure-url="/fail.html" 登陆失败进入的页面
+            ></security:form-login>
+
+        -->
+
+    <!--1. 放行资源-->
+    <security:http pattern="/login.html" security="none"/>
+    <security:http pattern="/fail.html" security="none"/>
+
+    <!--2. 拦截资源配置、登陆退出表单的配置-->
+    <security:http auto-config="true" use-expressions="false">
+        <!--/** 拦截所有请求,包含所有子目录-->
+        <!--access 表示访问所有资源的用户必须具有ROLE_USER角色，必须以Role_开头-->
+        <security:intercept-url pattern="/**" access="ROLE_USER"/>
+        <security:form-login
+                login-page="/login.html"
+                username-parameter="userName"
+                password-parameter="password"
+                login-processing-url="/login"
+                default-target-url="/success.html"
+                authentication-failure-url="/fail.html"></security:form-login>
+        <security:logout
+                logout-url="/logout"
+                logout-success-url="/login.html"
+                invalidate-session="true"></security:logout>
+
+        <!--关闭跨域请求的验证-->
+        <security:csrf disabled="true"/>
+    </security:http>
+
+    <!--配置登陆的账户密码信息（写死）-->
+    <security:authentication-manager>
+        <security:authentication-provider>
+            <security:user-service>
+                <!--{noop}表示不使用加密器对密码进行加密-->
+                <!--authorities 用户具有的权限-->
+                <security:user name="jack" password="{noop}888" authorities="ROLE_USER"/>
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager>
+</beans>
+
